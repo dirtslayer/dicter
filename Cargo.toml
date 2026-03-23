@@ -1,0 +1,3 @@
+[workspace]
+members = ["randphrase", "dicter","scroller", "slowcat"]
+resolver = "3"
