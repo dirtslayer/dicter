@@ -256,9 +256,8 @@ fn scroll_dicter_default(
     if total_width <= inner_width {
         let pad = inner_width - total_width;
         println!(
-            "{cursor_prefix}{lpad}{}{line}{}{rpad}",
+            "{cursor_prefix}{lpad}{}{line}{rpad}",
             PAD.repeat(pad),
-            PAD.repeat(pad)
         );
         return;
     }
