@@ -146,6 +146,23 @@ def "run slowcat with reader" [
 }
 
 #[task]
+def "run scroll mode tests" [
+  --info
+  ] {
+  let closure = {||
+    ^nu ./scroll_mode_tester.nu
+    return "finished running scroll mode tests"
+  }
+  return {
+    name: "run scroll mode tests"
+    description: "A-B tests for scroll modes"
+    closure: $closure
+    result: ( if not $info { do $closure } )
+  }
+}
+
+
+#[task]
 def "install" [
   --info
   ] {
@@ -209,16 +226,26 @@ let meta_tasks = [
   ( run slowcat --info )
   ( run slowcat with scroller --info )
   ( run slowcat with reader --info )
+  ( run scroll mode tests --info )
   ( install --info )
   ( time ticker --info )
 ]
 
-export def main [ ] {
+export def main [
+  --task : string
+ ] {
+  if  ( $task | is-not-empty )  {
+    let t = $meta_tasks | where $in.name == $task
+    let result = ( do $t.0.closure )
+    print $result
+    return 
+  }
   print "pick task to run"
   print "================"
-  let task = ( $meta_tasks  | input list -d
-    {|r| $"($r.name), ($r.description)"}
+  let t = ( $meta_tasks  | input list -d
+    {|r| $"(ansi blue)($r.name)(ansi reset), ($r.description)"}
   )
-  let result = ( do $task.closure )
+  let result = ( do $t.closure )
   print $result
+  return 
 }
