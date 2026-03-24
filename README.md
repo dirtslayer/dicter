@@ -10,8 +10,7 @@ _display random translations as a learning tool_
 
 ## dict short comming
 
-When I pick up a real dictionary my urge is to find a random word. Well, That
-urge was not satisfied with dict.
+When I pick up a real dictionary my urge is to find a random word.
 
 Dicter looks up random definitions from one of the freedict dictionaries you've
 installed. The default is english to french translation.
@@ -22,16 +21,17 @@ installed. The default is english to french translation.
 
 ## dictd required
 
-For this program to work you must have the dictd service running. You also need
+For dicter to work you must have the dictd service running. You also need
 to have whatever dictionaries installed. So, if you want the default, install
 freedict-eng-fr.
 
 ## Split architecture
 
-The random phrase generator will always have all its phrases in memory and dicter
-is a client to randphrase. Multiple dicter instances will share the randphrase
-socket server. The biggest annoyance about splitting the 2 parts is that they should
-be in PATH.
+The random phrase generator will always have all its phrases in memory and
+dicter is a client to randphrase. Multiple dicter instances will share the
+randphrase socket server. The biggest annoyance about splitting the 2 parts is
+that they should be in PATH. Really probably unnessary to split, but once it
+was done I just left it. This is only a learning project after all.
 
 ![](./diagram.png)
 
@@ -151,7 +151,7 @@ we just truncate to `width` and do not scroll.
 - **`--width <cols>`**: Output width in terminal columns (required).
 
 - **`--duration_ms <millis>`**: Total time to animate each incoming line
-(required; usually match dicter `--interval`).
+(required except for reader mode); usually matches dicter `--interval`).
 
 - **`--interval_ms <ms>`**: Time between animation frames in milliseconds
 (required).
@@ -177,7 +177,8 @@ scrolling) (default `2`).
 - **`--x <col>`**: Horizontal cursor position (ANSI `\x1B[<col>G`).
 
 - **`--y <row>`**: Vertical cursor position (ANSI `\x1B[<row>d`).
-When used with `--x`, outputs `\x1B[<row>;<col>H` instead.
+When used with `--x`, outputs `\x1B[<row>;<col>H` instead.i
+
 Mode Options
 =============
 
@@ -187,50 +188,47 @@ Mode Options
 whatever makes sense
 
 
-Modes
-======
+Scroller Modes
+==============
 
 
 - **`dicter-default`**:  when narrower sit still right aligned. when wider start
-left aligned and scroll to the left until the right-most letter hits the right
-edge, then change directions and go back to the start
+  left aligned and scroll to the left until the right-most letter hits the right
+  edge, then change directions and go back to the start
 
 
 - **`inner-bounce`**:  The left edge of the text hits the inner-left edge and
-stops; the right edge of the text hits the inner-right edge and stops; then it
-reverses direction. (this is the same as dicter-default unless the text is less
-than width, inner-bounce will have short text scrolling back and forth)
+  stops; the right edge of the text hits the inner-right edge and stops; then it
+  reverses direction. (this is the same as dicter-default unless the text is
+  less than width, inner-bounce will have short text scrolling back and forth)
 
 
 - **`marquee`**: Text starts fully off-screen to the right (window initially
-blank), flows in from the right edge, scrolls across to the left, flows out past
-the left edge, then repeats. Each cycle starts with a blank window. A test is
-available in `tester.nu` with 20 cycles.
+  blank), flows in from the right edge, scrolls across to the left, flows out
+  past the left edge, then repeats. Each cycle starts with a blank window. A
+  test is available in `tester.nu` with 20 cycles.
 
-Reader Mode
-===========
+- **`reader`**: Reader mode is designed to read an entire document inside a
+  scroller window, with no breaks between lines, that is, scroller rolls over
+  the entire text file seemlessly. There is no duration parameter with
+  reader mode, it is calculated by width and interval.
 
-Reader mode provides a different scrolling paradigm designed for reading text
-that arrives line-by-line (e.g., from a pipe or stdin).
+Project Notes
+=============
 
-**Window Structure**
-
-Reader mode begins by prepending 2 blank lines. This creates a 3-line window
-for reading:
-- **Top line**: the last line we scrolled
-- **Middle line**: the current scroll position
-- **Bottom line**: the newly read line (next position)
-
-Reader mode needs to know a line before and after what it is currently
-scrolling. We are always scrolling the previous line read from stdin, while
-the most recent line is held in the next position.
-
-**Behavior**
-
-- Does not pad lines with blanks
-- As the current scroll line exits the screen, the tail end of the previous
-  line fills the back with the contents of the next (just-read) line
-- The transition creates a natural reading flow as lines scroll off while
-  new content appears
-- After EOF is reached, 2 blank lines are appended to allow the final
-  content to scroll completely off-screen
+- Tasks Menu available by running:
+```
+nu tasks.nu
+```
+- Testing of scroll modes incomplete, see scroll_mode_tester.nu
+- Interupt with sigint (ctrl-c) or sigquit (ctrl-\)
+- No tests on pipe overflow or anything like that
+- LLM Disclosure. LLM's were used on parts of this project, but not all.
+- All LLM code has been reviewed.
+- There is another repo in my github to modify dictd so that it runs on Alpine
+  Linux,  <https://github.com/dirtslayer/dictd>, don't forget to switch to the
+  musl-tcp branch before compiling.
+- The packages required to compile Dictd on Alpine are:
+```
+build-base mk-configure mk-configure-dev libmaa-dev zlib-dev musl-dev
+```
