@@ -8,12 +8,12 @@ _display random translations as a learning tool_
 
 [dicter demo](dicter-demo.mp4)
 
-## dict short comming
+## dict short coming
 
 When I pick up a real dictionary my urge is to find a random word.
 
 Dicter looks up random definitions from one of the freedict dictionaries you've
-installed. The default is english to french translation.
+installed. The default is English to French translation.
 
 > [!NOTE]
 > dicter is designed to be used as a swaybar status_line
@@ -30,7 +30,7 @@ freedict-eng-fr.
 The random phrase generator will always have all its phrases in memory and
 dicter is a client to randphrase. Multiple dicter instances will share the
 randphrase socket server. The biggest annoyance about splitting the 2 parts is
-that they should be in PATH. Really probably unnessary to split, but once it
+that they should be in PATH. Really probably unnecessary to split, but once it
 was done I just left it. This is only a learning project after all.
 
 ![](./diagram.png)
@@ -120,17 +120,17 @@ dicter --dict freedict-gle-eng
 
 ## how to limit the width of dicter with scroller
 
-there is an additional program in this workspace called scroller which you can
+There is an additional program in this workspace called scroller which you can
 use to limit the width, the parameters are --duration_ms, which should match
 the interval of dicter, dicter's interval is how often a word changes, and
 srollers duration is how often it looks for new things to scroll, so they should
-match on the pipeline. scrollers' --interval_ms is is how often the letters move.
+match on the pipeline. scrollers' --interval_ms is how often the letters move.
 
 ```
 dicter --interval 10 | scroller --duration_ms 10000 --width 30 --interval_ms 250
 ```
 
-also, keep in mind that waybar uses sh, *NOT BASH*, to exec, therefore, 
+Also, keep in mind that waybar uses sh, *NOT BASH*, to exec, therefore, 
 setting your path in .bashrc will not help you in your waybar config, hence, 
 I just use full paths in config.json like so:
 
@@ -174,25 +174,19 @@ scrolling) (default `2`).
 - **`--mode <mode>`**: Scroll mode. Available modes: `dicter-default`,
 `inner-bounce`, `marquee`, `reader`. Default: `dicter-default`.
 
-- **`--x <col>`**: Horizontal cursor position (ANSI `\x1B[<col>G`).
+- **`--x <col>`**: Horizontal position within terminal window.
 
-- **`--y <row>`**: Vertical cursor position (ANSI `\x1B[<row>d`).
-When used with `--x`, outputs `\x1B[<row>;<col>H` instead.i
+- **`--y <row>`**: Vertical position within terminal window.
 
-Mode Options
-=============
+> [!NOTE]
+> x and y only make sense if you are running on the command line not as a
+> bar plugin. --y 1 --x 1 is top left. By default, we run in debug/plugin
+> mode, so x and y are not set normally, see scroll_mode_tester.nu for
+> a visual of normal output for debug/plugin
 
-- **`start-delay`**  mili wait before scroll starts
+## Scroller Modes
 
-- **`switch-delay`** milli wait before change directions or loop around end,
-whatever makes sense
-
-
-Scroller Modes
-==============
-
-
-- **`dicter-default`**:  when narrower sit still right aligned. when wider start
+- **`dicter-default`**:  when narrower sit still right aligned. When wider start
   left aligned and scroll to the left until the right-most letter hits the right
   edge, then change directions and go back to the start
 
@@ -210,7 +204,7 @@ Scroller Modes
 
 - **`reader`**: Reader mode is designed to read an entire document inside a
   scroller window, with no breaks between lines, that is, scroller rolls over
-  the entire text file seemlessly. There is no duration parameter with
+  the entire text file seamlessly. There is no duration parameter with
   reader mode, it is calculated by width and interval.
 
 Project Notes
@@ -221,14 +215,43 @@ Project Notes
 nu tasks.nu
 ```
 - Testing of scroll modes incomplete, see scroll_mode_tester.nu
-- Interupt with sigint (ctrl-c) or sigquit (ctrl-\)
+- You can interrupt with sigint (ctrl-c) or sigquit (ctrl-\\)
 - No tests on pipe overflow or anything like that
 - LLM Disclosure. LLM's were used on parts of this project, but not all.
 - All LLM code has been reviewed.
-- There is another repo in my github to modify dictd so that it runs on Alpine
-  Linux,  <https://github.com/dirtslayer/dictd>, don't forget to switch to the
-  musl-tcp branch before compiling.
+- There is another repo in my Github to modify Dictd so that it runs on Alpine
+  Linux, <https://github.com/dirtslayer/dictd>, use the musl-tcp branch.
 - The packages required to compile Dictd on Alpine are:
 ```
 build-base mk-configure mk-configure-dev libmaa-dev zlib-dev musl-dev
 ```
+### Learning Project Wrap
+
+What happened to the git history? Yes I torched it. I went fully experimental
+with JJ and kept having merge conflicts, and here is the craziest part: I let
+an LLM do some housekeeping and kaboom! I also got frustrated with all the
+pr's.  Since I like to have main up to date, it resulted in having JJ make for
+way too many pull requests. Also, I didn't enjoy how JJ creates pr body's all
+kept combining.
+
+I suppose I didn't clean up after myself in someway, but, no matter how novel
+something is, if it is new it can break your flow state, and so, I'll admit, it
+was a moment of frustration I torched my .git and .jj folders. Also, I did not
+want the nightmare commit history of learning jj here to reflect on.
+
+The biggest thing I've learned here, besides being thankful that I learned
+Nushell, is that LLM's are hard to use still. Often I would get something
+working and then down the line it would break. As such, you need tests, LLM's
+without tests is crazy!
+
+The nu-unit-test, tasks.nu, and scroll_mode_tester.nu are what is best about
+this entire repo because it is a structured framework that helped smooth out
+the entire cycle of plan, build, test.
+
+This project was conceived, coded and finished in the span of about 1 week, in
+the middle of March, in Redwater, Alberta. It is a beginner project but has
+many moving parts that show many aspects of software development. Feel free to
+comment as an issue or reach out to me if you see something I missed. Which is
+entirely possible as I am in a rush to get this off my plate and go into rehab.
+
+Thank you for using open source, have a nice day.
