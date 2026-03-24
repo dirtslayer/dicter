@@ -1,10 +1,10 @@
+use std::env;
 use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
 use std::net::TcpStream;
+use std::os::unix::net::UnixStream;
+use std::process::Command;
 use std::thread;
 use std::time::Duration;
-use std::env;
-use std::process::Command;
 
 fn debug(msg: &str) {
     if std::env::var("DEBUG").is_ok() {
@@ -46,6 +46,20 @@ fn get_pronounce() -> bool {
     env::args().any(|a| a == "--pronounce")
 }
 
+fn get_duration_s() -> Option<u64> {
+    let mut args = env::args().skip(1);
+    while let Some(arg) = args.next() {
+        if arg == "--duration_s" {
+            if let Some(val) = args.next() {
+                if let Ok(secs) = val.parse::<u64>() {
+                    return Some(secs);
+                }
+            }
+        }
+    }
+    None
+}
+
 fn strip_pronunciation_segments(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut in_seg = false;
@@ -78,14 +92,17 @@ fn strip_pronunciation_segments(s: &str) -> String {
 
 fn ensure_randphrase_running(dict: &str) {
     let socket_path = format!("/tmp/phrases-{}.sock", dict);
-    
+
     // Try to connect to existing socket
-    debug(&format!("Checking if randphrase is running on {}", socket_path));
+    debug(&format!(
+        "Checking if randphrase is running on {}",
+        socket_path
+    ));
     if UnixStream::connect(&socket_path).is_ok() {
         debug("randphrase is already running");
         return;
     }
-    
+
     // Socket doesn't exist or isn't responding, try to start randphrase
     debug(&format!("Starting randphrase with --dict {}", dict));
     match Command::new("randphrase")
@@ -99,7 +116,7 @@ fn ensure_randphrase_running(dict: &str) {
             debug("randphrase started, waiting for socket to be ready…");
             // Give it time to start and create the socket
             thread::sleep(Duration::from_millis(1000));
-            
+
             // Verify it's ready
             if UnixStream::connect(&socket_path).is_ok() {
                 debug("randphrase is ready");
@@ -136,7 +153,7 @@ fn extract_word_from_match(line: &str) -> Option<String> {
     let start = line.find('"')?;
     let end = line.rfind('"')?;
     if end > start {
-        Some(line[start+1 .. end].to_string())
+        Some(line[start + 1..end].to_string())
     } else {
         None
     }
@@ -257,15 +274,27 @@ fn main() -> std::io::Result<()> {
     let dict = get_dict_name();
     let interval = get_interval();
     let pronounce = get_pronounce();
+    let duration_s = get_duration_s();
 
     eprintln!("Using dictionary: {}", dict);
     eprintln!("Using interval: {} seconds", interval);
     eprintln!("Using pronounce: {}", pronounce);
-    
+    if let Some(d) = duration_s {
+        eprintln!("Using duration: {} seconds", d);
+    }
+
     // Ensure randphrase is running
     ensure_randphrase_running(&dict);
 
+    let start = std::time::Instant::now();
+
     loop {
+        if let Some(duration) = duration_s {
+            if start.elapsed().as_secs() >= duration {
+                eprintln!("Duration reached, exiting.");
+                return Ok(());
+            }
+        }
         let phrase = get_rand_phrase(&dict)?;
         // println!("Random phrase: {}", phrase);
 
@@ -296,4 +325,3 @@ fn main() -> std::io::Result<()> {
         thread::sleep(Duration::from_secs(interval));
     }
 }
-
