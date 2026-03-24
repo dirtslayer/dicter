@@ -132,7 +132,7 @@ def "run slowcat with reader" [
   --info
   ] {
   let closure = {||
-    open ./mise.toml | to text
+    open ./README.md | to text
     | ^cargo run --bin slowcat -- --interval 1
     | ^cargo run --bin scroller -- --width 20 --interval_ms 40 --y 0 --mode reader
     return "finished running slowcat with reader"
@@ -195,12 +195,12 @@ def "time ticker" [
       try { install }
       print (ansi -e "?25l") # hide cursor
       clear
-      for x in 67..76]  {
+      for x in 67..76  {
         ( date now | to text | str substring 0..-16
         | scroller
           --width 40
-          --interval_ms 200
-          --duration_ms 12400
+          --interval_ms 100
+          --duration_ms 6200
           --delay 0
           --x 5
           --y 5

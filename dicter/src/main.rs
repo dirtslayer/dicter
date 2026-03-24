@@ -291,7 +291,6 @@ fn main() -> std::io::Result<()> {
     loop {
         if let Some(duration) = duration_s {
             if start.elapsed().as_secs() >= duration {
-                eprintln!("Duration reached, exiting.");
                 return Ok(());
             }
         }
